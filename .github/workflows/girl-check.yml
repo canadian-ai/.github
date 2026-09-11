@@ -18,6 +18,11 @@ on:
         required: false
         type: string
         default: "1.25.x"
+      node-version:
+        description: Node.js version for JavaScript projects
+        required: false
+        type: string
+        default: "22"
 
 permissions:
   contents: read
@@ -35,6 +40,35 @@ jobs:
         uses: actions/setup-go@v5
         with:
           go-version: ${{ inputs.go-version }}
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ inputs.node-version }}
+
+      - name: Set up Bun
+        uses: oven-sh/setup-bun@v2
+
+      - name: Install project dependencies
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd "${{ inputs.path }}"
+          if [[ -f bun.lock || -f bun.lockb ]]; then
+            bun install --frozen-lockfile
+          elif [[ -f pnpm-lock.yaml ]]; then
+            corepack enable
+            pnpm install --frozen-lockfile
+          elif [[ -f yarn.lock ]]; then
+            corepack enable
+            yarn install --immutable
+          elif [[ -f package-lock.json ]]; then
+            npm ci
+          elif [[ -f package.json ]]; then
+            npm install
+          else
+            echo "No JavaScript package manifest detected; skipping dependency install."
+          fi
 
       - name: Install GIRL
         shell: bash
