@@ -72,7 +72,7 @@ jobs:
 
       - name: Install GIRL
         shell: bash
-        run: go install "github.com/canadian-ai/girl@${{ inputs.girl-version }}"
+        run: go install "github.com/canadian-ai/girl/cmd/girl@${{ inputs.girl-version }}"
 
       - name: Run GIRL quality contract
         shell: bash
