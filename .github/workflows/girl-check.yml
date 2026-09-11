@@ -1,0 +1,45 @@
+name: GIRL Check
+
+on:
+  workflow_call:
+    inputs:
+      path:
+        description: Project path to check
+        required: false
+        type: string
+        default: "."
+      girl-version:
+        description: GIRL module version (latest or vX.Y.Z)
+        required: false
+        type: string
+        default: "latest"
+      go-version:
+        description: Go version used to install GIRL
+        required: false
+        type: string
+        default: "1.25.x"
+
+permissions:
+  contents: read
+
+jobs:
+  girl-check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: ${{ inputs.go-version }}
+
+      - name: Install GIRL
+        shell: bash
+        run: go install "github.com/canadian-ai/girl@${{ inputs.girl-version }}"
+
+      - name: Run GIRL quality contract
+        shell: bash
+        run: girl check "${{ inputs.path }}" --ci
